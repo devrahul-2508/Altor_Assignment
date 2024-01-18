@@ -146,16 +146,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else
                     return Text('Loading.....', style: TextStyle(fontSize: 16));
                 }),
-
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Gyroscope Data:',
               style: TextStyle(fontSize: 20),
             ),
-
             StreamBuilder<Map<String, dynamic>?>(
-                stream:
-                    FlutterBackgroundService().on("updateGyroscopeData"),
+                stream: FlutterBackgroundService().on("updateGyroscopeData"),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     final data = snapshot.data!;
@@ -170,16 +167,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else
                     return Text('Loading.....', style: TextStyle(fontSize: 16));
                 }),
-
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Magnometer Data:',
               style: TextStyle(fontSize: 20),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             StreamBuilder<Map<String, dynamic>?>(
-                stream:
-                    FlutterBackgroundService().on("updateMagnetometerData"),
+                stream: FlutterBackgroundService().on("updateMagnetometerData"),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     final data = snapshot.data!;
@@ -194,17 +189,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else
                     return Text('Loading.....', style: TextStyle(fontSize: 16));
                 }),
-            ///////
+            const Text(
+              'Location and Speed',
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 10),
+            StreamBuilder<Map<String, dynamic>?>(
+                stream: FlutterBackgroundService().on("updateLocationData"),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    var latititude = data['data']['lat'];
+                    var longitude = data['data']['long'];
+                    var speed = data['data']['speed'];
 
-            SizedBox(height: 10),
-            if (_position != null)
-              Text(
-                ' ${_position?.latitude}, '
-                ' ${_position?.longitude}, ',
-                style: TextStyle(fontSize: 16),
-              )
-            else
-              Text('No data available', style: TextStyle(fontSize: 16)),
+                    return Text(
+                      'Lat: ${latititude}, Long: ${longitude}, Speed: ${speed.toStringAsFixed(2)}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16),
+                    );
+                  } else
+                    return Text('Loading.....', style: TextStyle(fontSize: 16));
+                })
           ],
         ),
       ),

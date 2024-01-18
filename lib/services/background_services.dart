@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 Future<void> initializeService() async {
@@ -20,13 +21,60 @@ Future<void> initializeService() async {
           onStart: onStart, isForegroundMode: true, autoStart: true));
 }
 
-const MethodChannel backgroundChannel = MethodChannel('background_channel');
+  Position? _position;
+
+
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  // List to store accelerometer data
-  // startSensorStream();
+  DartPluginRegistrant.ensureInitialized();
 
+  startServices(service);
+
+  if (service is AndroidServiceInstance) {
+    service.on('setAsForeground').listen((event) {
+      service.setAsForegroundService();
+    });
+
+    service.on('setAsBackground').listen((event) {
+      service.setAsBackgroundService();
+    });
+  }
+  service.on('stopService').listen((event) {
+    service.stopSelf();
+  });
+
+  Timer.periodic(Duration(seconds: 1), (timer) async {
+    if (service is AndroidServiceInstance) {
+      if (await service.isForegroundService()) {
+        service.setForegroundNotificationInfo(
+          title: "Altor",
+          content: (_position==null)? "Displaying velocity....": _position!.speed.toStringAsFixed(2),
+        );
+      }
+    }
+
+    print("Background service running");
+
+    service.invoke(
+      'update',
+      {
+        "current_date": DateTime.now().toIso8601String(),
+        "device": "Samsung",
+      },
+    );
+  });
+}
+
+@pragma('vm:entry-point')
+Future<bool> onIosBackground(ServiceInstance service) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+  return true;
+}
+
+@pragma('vm:entry-point')
+void startServices(ServiceInstance service) async {
   List<AccelerometerEvent> _accelerometerValues = [];
   late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
 
@@ -82,47 +130,36 @@ void onStart(ServiceInstance service) async {
     );
   });
 
-  DartPluginRegistrant.ensureInitialized();
-  if (service is AndroidServiceInstance) {
-    service.on('setAsForeground').listen((event) {
-      service.setAsForegroundService();
-    });
+  late StreamSubscription<Position> _positionStreamSubscription;
 
-    service.on('setAsBackground').listen((event) {
-      service.setAsBackgroundService();
-    });
-  }
-  service.on('stopService').listen((event) {
-    service.stopSelf();
-  });
+  LocationPermission locationPermission = await Geolocator.checkPermission();
 
-  Timer.periodic(Duration(seconds: 1), (timer) async {
-    if (service is AndroidServiceInstance) {
-      if (await service.isForegroundService()) {
-        service.setForegroundNotificationInfo(
-          title: "Altor",
-          content: 'X: ${_accelerometerValues[0].x.toStringAsFixed(2)}, '
-              'Y: ${_accelerometerValues[0].y.toStringAsFixed(2)}, '
-              'Z: ${_accelerometerValues[0].z.toStringAsFixed(2)}',
+  if (locationPermission == LocationPermission.denied) {
+    await Geolocator.requestPermission();
+  } else if (locationPermission == LocationPermission.deniedForever) {
+    await Geolocator.openAppSettings();
+  } else {
+    if (await Geolocator.isLocationServiceEnabled()) {
+      _positionStreamSubscription =
+          Geolocator.getPositionStream().listen((Position? position) {
+        _position = position;
+
+        print(_position!.latitude);
+        print(_position!.longitude);
+
+        Map<String, double> eventData = {
+          'lat': _position!.latitude,
+          'long': _position!.longitude,
+          'speed': _position!.speed
+        };
+
+        service.invoke(
+          'updateLocationData',
+          {"data": eventData},
         );
-      }
+      });
+    } else {
+      await Geolocator.openLocationSettings();
     }
-
-    print("Background service running");
-
-    service.invoke(
-      'update',
-      {
-        "current_date": DateTime.now().toIso8601String(),
-        "device": "Samsung",
-      },
-    );
-  });
-}
-
-@pragma('vm:entry-point')
-Future<bool> onIosBackground(ServiceInstance service) async {
-  WidgetsFlutterBinding.ensureInitialized();
-  DartPluginRegistrant.ensureInitialized();
-  return true;
+  }
 }
