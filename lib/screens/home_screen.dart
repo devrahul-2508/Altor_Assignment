@@ -116,26 +116,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 DateTime? date = DateTime.tryParse(data["current_date"]);
                 return Column(
                   children: [
-                    Text(
+                    const Text(
                       "Welcome to Altor Test",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 5,
                     ),
-                    Text(
+                    const Text(
                       "Current Time",
                       style: TextStyle(
                         fontSize: 18,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 5,
                     ),
                     Text(
                       date.toString(),
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 );
