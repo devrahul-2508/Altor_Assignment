@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:altor_assignment/services/sensor_services.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:geolocator/geolocator.dart';
@@ -44,7 +42,7 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
-  Timer.periodic(Duration(seconds: 1), (timer) async {
+  Timer.periodic(const Duration(seconds: 1), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         service.setForegroundNotificationInfo(
@@ -55,7 +53,6 @@ void onStart(ServiceInstance service) async {
       }
     }
 
-    print("Background service running");
 
     service.invoke(
       'update',
@@ -144,13 +141,12 @@ void startServices(ServiceInstance service) async {
           Geolocator.getPositionStream().listen((Position? position) {
         _position = position;
 
-        print(_position!.latitude);
-        print(_position!.longitude);
 
         Map<String, double> eventData = {
           'lat': _position!.latitude,
           'long': _position!.longitude,
-          'speed': _position!.speed
+          'speed': _position!.speed,
+          "altitude": _position!.altitude
         };
 
         service.invoke(

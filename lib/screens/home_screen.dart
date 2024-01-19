@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             StreamBuilder<Map<String, dynamic>?>(
               stream: FlutterBackgroundService().on('update'),
               builder: (context, snapshot) {
@@ -123,12 +123,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Accelerometer Data:',
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             StreamBuilder<Map<String, dynamic>?>(
                 stream:
                     FlutterBackgroundService().on("updateAccelerometerData"),
@@ -141,10 +141,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return Text(
                       'X: ${x.toStringAsFixed(2)}, Y: ${y.toStringAsFixed(2)}, Z: ${z.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     );
-                  } else
-                    return Text('Loading.....', style: TextStyle(fontSize: 16));
+                  } else {
+                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                  }
                 }),
             const SizedBox(height: 10),
             const Text(
@@ -162,10 +163,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return Text(
                       'X: ${x.toStringAsFixed(2)}, Y: ${y.toStringAsFixed(2)}, Z: ${z.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     );
-                  } else
-                    return Text('Loading.....', style: TextStyle(fontSize: 16));
+                  } else {
+                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                  }
                 }),
             const SizedBox(height: 10),
             const Text(
@@ -184,10 +186,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return Text(
                       'X: ${x.toStringAsFixed(2)}, Y: ${y.toStringAsFixed(2)}, Z: ${z.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     );
-                  } else
-                    return Text('Loading.....', style: TextStyle(fontSize: 16));
+                  } else {
+                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                  }
                 }),
             const Text(
               'Location and Speed',
@@ -202,14 +205,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     var latititude = data['data']['lat'];
                     var longitude = data['data']['long'];
                     var speed = data['data']['speed'];
+                    var altitude = data['data']['altitude'];
 
-                    return Text(
-                      'Lat: ${latititude}, Long: ${longitude}, Speed: ${speed.toStringAsFixed(2)}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16),
+                    return Column(
+                      children: [
+                        Text(
+                          'Lat: $latititude, Long: $longitude',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        Text(
+                          'Speed: ${speed.toStringAsFixed(2)} m/sec',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        Text(
+                          'Altitude: ${altitude.toStringAsFixed(2)}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
                     );
-                  } else
-                    return Text('Loading.....', style: TextStyle(fontSize: 16));
+                  } else {
+                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                  }
                 })
           ],
         ),
