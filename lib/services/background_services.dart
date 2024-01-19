@@ -21,9 +21,9 @@ Future<void> initializeService() async {
           onStart: onStart, isForegroundMode: true, autoStart: true));
 }
 
-  Position? _position;
+Position? _position;
 
-
+List<AccelerometerEvent> _accelerometerValues = [];
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
@@ -48,9 +48,10 @@ void onStart(ServiceInstance service) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         service.setForegroundNotificationInfo(
-          title: "Altor",
-          content: (_position==null)? "Displaying velocity....": _position!.speed.toStringAsFixed(2),
-        );
+            title: "Altor",
+            content: (_position == null)
+                ? "Loading Speed"
+                : "You are moving at ${_position!.speed.toStringAsFixed(2)} m/sec");
       }
     }
 
@@ -75,7 +76,6 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 
 @pragma('vm:entry-point')
 void startServices(ServiceInstance service) async {
-  List<AccelerometerEvent> _accelerometerValues = [];
   late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
 
   _accelerometerSubscription = accelerometerEventStream().listen((event) {
