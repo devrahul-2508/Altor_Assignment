@@ -131,7 +131,6 @@ void startServices(ServiceInstance service) async {
   LocationPermission locationPermission = await Geolocator.checkPermission();
 
   if (locationPermission == LocationPermission.denied) {
-    await Geolocator.requestPermission();
   } else if (locationPermission == LocationPermission.deniedForever) {
     await Geolocator.openAppSettings();
   } else {

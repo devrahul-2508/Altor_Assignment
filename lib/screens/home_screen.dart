@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    startSensorStream();
+   // startSensorStream();
     _checkLocationPermission();
     // _accelerometerSubscription = accelerometerEventStream().listen((event) {
     //   setState(() {
@@ -90,8 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (locationPermission == LocationPermission.deniedForever) {
       await Geolocator.openAppSettings();
     }
-
-    _startLocationFetchingStream();
   }
 
   @override
