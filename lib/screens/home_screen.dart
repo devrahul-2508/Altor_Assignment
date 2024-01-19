@@ -113,12 +113,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 final data = snapshot.data!;
-                String? device = data["device"];
                 DateTime? date = DateTime.tryParse(data["current_date"]);
                 return Column(
                   children: [
-                    Text(device ?? 'Unknown'),
-                    Text(date.toString()),
+                    Text(
+                      "Welcome to Altor Test",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      "Current Time",
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      date.toString(),
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ],
                 );
               },
@@ -144,7 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: const TextStyle(fontSize: 16),
                     );
                   } else {
-                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                    return const Text('Loading.....',
+                        style: TextStyle(fontSize: 16));
                   }
                 }),
             const SizedBox(height: 10),
@@ -166,7 +185,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: const TextStyle(fontSize: 16),
                     );
                   } else {
-                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                    return const Text('Loading.....',
+                        style: TextStyle(fontSize: 16));
                   }
                 }),
             const SizedBox(height: 10),
@@ -189,7 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: const TextStyle(fontSize: 16),
                     );
                   } else {
-                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                    return const Text('Loading.....',
+                        style: TextStyle(fontSize: 16));
                   }
                 }),
             const Text(
@@ -227,7 +248,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     );
                   } else {
-                    return const Text('Loading.....', style: TextStyle(fontSize: 16));
+                    return const Text('Loading.....',
+                        style: TextStyle(fontSize: 16));
                   }
                 })
           ],

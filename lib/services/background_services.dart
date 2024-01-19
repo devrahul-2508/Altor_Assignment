@@ -58,7 +58,6 @@ void onStart(ServiceInstance service) async {
       'update',
       {
         "current_date": DateTime.now().toIso8601String(),
-        "device": "Samsung",
       },
     );
   });
