@@ -25,7 +25,7 @@ List<AccelerometerEvent> _accelerometerValues = [];
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  DartPluginRegistrant.ensureInitialized();
+ // DartPluginRegistrant.ensureInitialized();
 
   startServices(service);
 
