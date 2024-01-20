@@ -69,18 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //disposeSensorStream();
   }
 
-  void _startLocationFetchingStream() async {
-    if (await Geolocator.isLocationServiceEnabled()) {
-      _positionStreamSubscription =
-          Geolocator.getPositionStream().listen((Position? position) {
-        setState(() {
-          _position = position;
-        });
-      });
-    } else {
-      await Geolocator.openLocationSettings();
-    }
-  }
+
 
   void _checkLocationPermission() async {
     LocationPermission locationPermission = await Geolocator.checkPermission();

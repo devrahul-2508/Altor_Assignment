@@ -53,6 +53,7 @@ void onStart(ServiceInstance service) async {
       }
     }
 
+    print("Background Service Running ");
 
     service.invoke(
       'update',
@@ -139,6 +140,7 @@ void startServices(ServiceInstance service) async {
           Geolocator.getPositionStream().listen((Position? position) {
         _position = position;
 
+        print(_position!.latitude);
 
         Map<String, double> eventData = {
           'lat': _position!.latitude,
