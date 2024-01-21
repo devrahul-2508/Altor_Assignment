@@ -34,10 +34,13 @@ StreamSubscription<Position>? _positionStreamSubscription;
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  // DartPluginRegistrant.ensureInitialized();
 
+
+  //Initializing Firebase
   await Firebase.initializeApp();
 
+
+  //Initializing Sensor stuffs and Streams
   startServices(service);
 
   if (service is AndroidServiceInstance) {
@@ -53,9 +56,44 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
+  //Location related services
+  //Invoked from home_screen.dart
+  service.on('getLocation').listen((event) {
+
+
+    //Checking for continuous location updates
+    _positionStreamSubscription =
+        Geolocator.getPositionStream().listen((Position? position) {
+      _position = position;
+
+      print(_position!.latitude);
+
+      Map<String, double> eventData = {
+        'lat': _position!.latitude,
+        'long': _position!.longitude,
+        'speed': _position!.speed,
+        "altitude": _position!.altitude
+      };
+      
+      // Sending back location data to home_screen.dart
+
+      service.invoke(
+        'updateLocationData',
+        {"data": eventData},
+      );
+    }, onError: (e) {
+      // On device location turned off --> setting the position back to null
+      _position = null;
+      // Sending back location data to home_screen.dart
+      service.invoke('updateLocationData', {"data": null});
+    });
+  });
+
   Timer.periodic(const Duration(seconds: 1), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
+
+        //Setting up notification panel and displaying current speed
         service.setForegroundNotificationInfo(
             title: "Altor",
             content: (_position == null)
@@ -63,32 +101,9 @@ void onStart(ServiceInstance service) async {
                 : "You are moving at ${_position!.speed.toStringAsFixed(2)} m/sec");
       }
 
-      service.on('getLocation').listen((event) {
-        print("Invoking location");
 
-        _positionStreamSubscription =
-            Geolocator.getPositionStream().listen((Position? position) {
-          _position = position;
-
-          print(_position!.latitude);
-
-          Map<String, double> eventData = {
-            'lat': _position!.latitude,
-            'long': _position!.longitude,
-            'speed': _position!.speed,
-            "altitude": _position!.altitude
-          };
-
-          service.invoke(
-            'updateLocationData',
-            {"data": eventData},
-          );
-        }, onError: (e) {
-          _position = null;
-        });
-      });
-
-      if (_position != null) {
+      //Checking if location has been turned off or device stopped listening to location updates
+    if (_position != null) {
         var altorModel = AltorModel(accelerometer: [
           _accelerometerValues[0].x,
           _accelerometerValues[0].y,
@@ -105,7 +120,9 @@ void onStart(ServiceInstance service) async {
           _position!.latitude,
           _position!.longitude
         ], speed: _position!.speed, altitude: _position!.altitude);
-        await DatabaseService().addAltorModel(altorModel);
+       
+       //Pushing data to server only if device is listening to location updates
+       await DatabaseService().addAltorModel(altorModel);
       }
     }
 
@@ -131,8 +148,9 @@ Future<bool> onIosBackground(ServiceInstance service) async {
 void startServices(ServiceInstance service) async {
   late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
 
+
+  //Accelerometer service
   _accelerometerSubscription = accelerometerEventStream().listen((event) {
-    // Update the _accelerometerValues list with the latest event
     _accelerometerValues = [event];
 
     Map<String, double> eventData = {
@@ -140,12 +158,16 @@ void startServices(ServiceInstance service) async {
       'y': event.y.toDouble(),
       'z': event.z.toDouble(),
     };
+      // Sending back accelerometer data to home_screen.dart
 
     service.invoke(
       'updateAccelerometerData',
       {"data": eventData},
     );
   });
+
+
+  //Gyroscope Services
 
   late StreamSubscription<GyroscopeEvent> _gyroscopeSubscription;
 
@@ -158,11 +180,15 @@ void startServices(ServiceInstance service) async {
       'z': event.z.toDouble(),
     };
 
+          // Sending back gyroscope data to home_screen.dart
+
     service.invoke(
       'updateGyroscopeData',
       {"data": eventData},
     );
   });
+
+  //Magnetometer Services
 
   late StreamSubscription<MagnetometerEvent> _magnetometerSubscription;
 
@@ -174,6 +200,9 @@ void startServices(ServiceInstance service) async {
       'y': event.y.toDouble(),
       'z': event.z.toDouble(),
     };
+
+          // Sending back magnetometer data to home_screen.dart
+
 
     service.invoke(
       'updateMagnetometerData',

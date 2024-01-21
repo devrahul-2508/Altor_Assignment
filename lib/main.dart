@@ -9,7 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
 
-
+ // Requesting for displaying Notification
   await Permission.notification.isDenied.then(
     (value) {
       if (value) {
@@ -17,9 +17,12 @@ void main() async {
       }
     },
   );
+
+  // Initializing Background Service
   await initializeService();
 
 
+  // Invoking Foreground Service
   FlutterBackgroundService().invoke('setAsForeground');
   runApp(const MyApp());
 }

@@ -1,10 +1,6 @@
-import 'dart:async';
-
-import 'package:altor_assignment/services/sensor_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,66 +10,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // List to store accelerometer data
-  List<AccelerometerEvent> _accelerometerValues = [];
-
-  // // StreamSubscription for accelerometer events
-  // late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
-
-  List<GyroscopeEvent> _gyroscopeValues = [];
-
-  // // StreamSubscription for accelerometer events
-
-  // late StreamSubscription<GyroscopeEvent> _gyroscopeSubscription;
-
-  List<MagnetometerEvent> _magnometerValues = [];
-  // late StreamSubscription<MagnetometerEvent> _magnetometerSubscription;
-
-  late StreamSubscription<Position> _positionStreamSubscription;
-  Position? _position;
+ 
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // startSensorStream();
+
+    //Check if Location Permissions has been enabled
     _checkLocationPermission();
-    // _accelerometerSubscription = accelerometerEventStream().listen((event) {
-    //   setState(() {
-    //     // Update the _accelerometerValues list with the latest event
-    //     _accelerometerValues = [event];
-    //   });
-    // });
-
-    // _gyroscopeSubscription = gyroscopeEventStream().listen((event) {
-    //   setState(() {
-    //     _gyroscopeValues = [event];
-    //   });
-    // });
-
-    // _magnetometerSubscription = magnetometerEventStream().listen((event) {
-    //   setState(() {
-    //     _magnometerValues = [event];
-    //   });
-    // });
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
-    // _accelerometerSubscription.cancel();
-    // _gyroscopeSubscription.cancel();
-    // _magnetometerSubscription.cancel();
-
-    //disposeSensorStream();
   }
 
   void _checkLocationPermission() async {
     LocationPermission locationPermission = await Geolocator.checkPermission();
 
     if (locationPermission == LocationPermission.denied) {
+
+      // Requesting for location Permission
       await Geolocator.requestPermission();
+
+      // Checking if user has allowed the requested permission or not
       _checkLocationPermission();
     } else if (locationPermission == LocationPermission.deniedForever) {
       await Geolocator.openAppSettings();
@@ -91,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const SizedBox(height: 10),
+
+            //Data for Current Time
             StreamBuilder<Map<String, dynamic>?>(
               stream: FlutterBackgroundService().on('update'),
               builder: (context, snapshot) {
@@ -130,6 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(height: 10),
+
+            //Acclerometer Data
             const Text(
               'Accelerometer Data:',
               style: const TextStyle(fontSize: 20),
@@ -155,6 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 }),
             const SizedBox(height: 10),
+
+            // Gyroscope Data
             const Text(
               'Gyroscope Data:',
               style: TextStyle(fontSize: 20),
@@ -178,6 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 }),
             const SizedBox(height: 10),
+
+            // Magnetometer Data
             const Text(
               'Magnometer Data:',
               style: TextStyle(fontSize: 20),
@@ -201,6 +169,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(fontSize: 16));
                   }
                 }),
+
+                //Location Data
             const Text(
               'Location and Speed',
               style: TextStyle(fontSize: 20),
@@ -210,31 +180,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 stream: FlutterBackgroundService().on("updateLocationData"),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    final data = snapshot.data!;
-                    var latititude = data['data']['lat'];
-                    var longitude = data['data']['long'];
-                    var speed = data['data']['speed'];
-                    var altitude = data['data']['altitude'];
+                    final data = snapshot.data?['data'];
 
-                    return Column(
-                      children: [
-                        Text(
-                          'Lat: $latititude, Long: $longitude',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        Text(
-                          'Speed: ${speed.toStringAsFixed(2)} m/sec',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        Text(
-                          'Altitude: ${altitude.toStringAsFixed(2)}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    );
+                    //Checking if location has not been turned off -->
+                    if (data != null) {
+                      var latititude = data['lat'];
+                      var longitude = data['long'];
+                      var speed = data['speed'];
+                      var altitude = data['altitude'];
+
+                      return Column(
+                        children: [
+                          Text(
+                            'Lat: $latititude, Long: $longitude',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            'Speed: ${speed.toStringAsFixed(2)} m/sec',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            'Altitude: ${altitude.toStringAsFixed(2)}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      );
+                    } else {
+                      // Location Turned off -->
+                      return const Text(
+                        "Location Updates stopped. Turn on Location",
+                        style: TextStyle(fontSize: 14, color: Colors.red),
+                      );
+                    }
                   } else {
                     return const Text('Loading.....',
                         style: TextStyle(fontSize: 16));
