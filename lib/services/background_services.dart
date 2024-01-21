@@ -66,7 +66,6 @@ void onStart(ServiceInstance service) async {
       service.on('getLocation').listen((event) {
         print("Invoking location");
 
-        print("Enabled");
         _positionStreamSubscription =
             Geolocator.getPositionStream().listen((Position? position) {
           _position = position;
