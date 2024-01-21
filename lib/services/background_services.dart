@@ -30,6 +30,8 @@ List<GyroscopeEvent> _gyroscopeValues = [];
 
 List<MagnetometerEvent> _magnometerValues = [];
 
+StreamSubscription<Position>? _positionStreamSubscription;
+
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   // DartPluginRegistrant.ensureInitialized();
@@ -60,6 +62,32 @@ void onStart(ServiceInstance service) async {
                 ? "Loading Speed"
                 : "You are moving at ${_position!.speed.toStringAsFixed(2)} m/sec");
       }
+
+      service.on('getLocation').listen((event) {
+        print("Invoking location");
+
+        print("Enabled");
+        _positionStreamSubscription =
+            Geolocator.getPositionStream().listen((Position? position) {
+          _position = position;
+
+          print(_position!.latitude);
+
+          Map<String, double> eventData = {
+            'lat': _position!.latitude,
+            'long': _position!.longitude,
+            'speed': _position!.speed,
+            "altitude": _position!.altitude
+          };
+
+          service.invoke(
+            'updateLocationData',
+            {"data": eventData},
+          );
+        }, onError: (e) {
+          _position = null;
+        });
+      });
 
       if (_position != null) {
         var altorModel = AltorModel(accelerometer: [
@@ -153,36 +181,4 @@ void startServices(ServiceInstance service) async {
       {"data": eventData},
     );
   });
-
-  late StreamSubscription<Position> _positionStreamSubscription;
-
-  LocationPermission locationPermission = await Geolocator.checkPermission();
-
-  if (locationPermission == LocationPermission.denied) {
-  } else if (locationPermission == LocationPermission.deniedForever) {
-    await Geolocator.openAppSettings();
-  } else {
-    if (await Geolocator.isLocationServiceEnabled()) {
-      _positionStreamSubscription =
-          Geolocator.getPositionStream().listen((Position? position) {
-        _position = position;
-
-        print(_position!.latitude);
-
-        Map<String, double> eventData = {
-          'lat': _position!.latitude,
-          'long': _position!.longitude,
-          'speed': _position!.speed,
-          "altitude": _position!.altitude
-        };
-
-        service.invoke(
-          'updateLocationData',
-          {"data": eventData},
-        );
-      });
-    } else {
-      await Geolocator.openLocationSettings();
-    }
-  }
 }

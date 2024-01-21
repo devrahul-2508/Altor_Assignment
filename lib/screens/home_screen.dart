@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-   // startSensorStream();
+    // startSensorStream();
     _checkLocationPermission();
     // _accelerometerSubscription = accelerometerEventStream().listen((event) {
     //   setState(() {
@@ -69,15 +69,16 @@ class _HomeScreenState extends State<HomeScreen> {
     //disposeSensorStream();
   }
 
-
-
   void _checkLocationPermission() async {
     LocationPermission locationPermission = await Geolocator.checkPermission();
 
     if (locationPermission == LocationPermission.denied) {
       await Geolocator.requestPermission();
+      _checkLocationPermission();
     } else if (locationPermission == LocationPermission.deniedForever) {
       await Geolocator.openAppSettings();
+    } else {
+      FlutterBackgroundService().invoke('getLocation');
     }
   }
 
